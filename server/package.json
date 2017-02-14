@@ -1,0 +1,16 @@
+{
+  "name": "kiss-em-chat-server",
+  "version": "0.0.1",
+  "description": "Chat backend with node, express and socket.io.",
+  "main": "server.js",
+  "scripts": {
+    "dev": "node server.js"
+  },
+  "author": "Krista Väänänen",
+  "license": "MIT",
+  "private": true,
+  "dependencies": {
+    "express": "^4.14.1",
+    "socket.io": "^1.7.2"
+  }
+}

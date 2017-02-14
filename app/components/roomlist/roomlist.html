@@ -1,0 +1,39 @@
+<div class="content-container">
+
+    <h2>Chat rooms</h2>
+
+    <div class="row">
+        <div class="col-sm-4">
+            <div data-ng-repeat="room in rooms.slice(0,8)">
+                <p><b ng-click="goto(room.name)">{{room.name}}</b>, {{room.users.length}} users: <b><a href="" ng-click="goto(room.name)">Join!</a></b></p>
+            </div>
+        </div>
+        <div class="col-sm-4">
+            <div data-ng-repeat="room in rooms.slice(8,16)">
+                <p><b ng-click="goto(room.name)">{{room.name}}</b>, {{room.users.length}} users: <b><a href="" ng-click="goto(room.name)">Join!</a></b></p>
+            </div>
+        </div>
+        <div class="col-sm-4">
+            <div data-ng-repeat="room in rooms.slice(16,24)">
+                <p><b ng-click="goto(room.name)">{{room.name}}</b>, {{room.users.length}} users: <b><a href="" ng-click="goto(room.name)">Join!</a></b></p>
+            </div>
+        </div>
+    </div>
+    <div class="row" ng-if="rooms.length > 24">
+        <!-- TODO add functionality -->
+        <button type="button" class="btn btn-lg btn-custom">See more rooms</button>
+    </div>
+
+    <div class="row">
+        <div class="col-sm-6">
+            <h3>Create new room</h3>
+            <form class="form-inline" ng-submit="addRoom()">
+                <label for="roomName" class="sr-only">RoomName</label>
+                <input type="text" id="roomName" ng-model="roomName" class="form-control" placeholder="room" required>
+                <input type="submit" class="btn btn-default" value="Add new room"/>
+            </form>
+        </div>
+    </div>
+
+</div>
+

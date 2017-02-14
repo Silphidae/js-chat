@@ -1,0 +1,14 @@
+<link rel="stylesheet" ng-href="assets/css/{{layout}}-style.css">
+
+<div class="cover-container">
+    <div class="masthead">
+        <h3 class="masthead-brand">Kiss'em chat <3</h3>
+        <nav>
+            <ul class="nav masthead-nav">
+                <li ng-if="username"><span>User: {{username}}</span></li>
+                <li ng-if="username"><a href="" ng-click="logout()">Log out</a></li>
+                <li><a href="" ng-click="changeLayout()">Change theme</a></li>
+            </ul>
+        </nav>
+    </div>
+</div>

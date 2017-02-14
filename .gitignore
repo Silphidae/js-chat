@@ -1,0 +1,6 @@
+app/bower_components/*
+server/node_modules/*
+
+app/assets/js/socket.io.js
+app/assets/js/socket.io.js.map
+
