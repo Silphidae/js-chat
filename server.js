@@ -1,20 +1,17 @@
 var express = require('express');
 var app = express();
+var server = require('http').createServer(app);
 
 // Configuration
 var PORT = process.env.PORT || 3000;
 
-// Start server
-var server = app.listen(PORT, function() {
-    console.log('Listening on port ' + PORT + ' in %s mode', app.settings.env);
-});
+// Serve static files
+app.use(express.static('app'));
 
 // Add socket.io
 require('./socket').listen(server);
 
-
-// some routing
-app.get('/', function(req, res) {
-    res.send('Chat backend.');
+// Start server
+server.listen(PORT, function() {
+    console.log('Listening on port ' + PORT + ' in %s mode', app.settings.env);
 });
-

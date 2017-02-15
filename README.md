@@ -1,14 +1,17 @@
 ## Kiss'em chat
 
-#### *"Chat like in the old days!"*
+#### *Chat like in the old days!*
 
 
-A demo chat application.
+Basic chat application.
+
+A demo application can be found in
+https://simple-socket-chat-demo.herokuapp.com/
 
 
 **Backend:** Node, Express, Socket.io
 
-- Code in server folder.
+- Code in root.
 
 **Frontend:** AngularJS, Bootstrap, Socket.io
 

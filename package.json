@@ -4,9 +4,9 @@
   "description": "Chat backend with node, express and socket.io.",
   "main": "server.js",
   "scripts": {
-    "dev": "node server.js"
+    "start": "node server.js",
+    "postinstall": "cd app && ../node_modules/bower/bin/bower install"
   },
-  "postinstall": "cd app && ../node_module/bower/bin/bower install",
   "author": "Krista Väänänen",
   "license": "MIT",
   "private": true,

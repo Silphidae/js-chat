@@ -4,7 +4,7 @@ angular.module('ChatAppServices', []);
 
 angular.module('ChatAppServices')
     .factory('socket', ['$rootScope', function($rootScope) {
-        var socket = io.connect('http://localhost:3000');
+        var socket = io.connect();
 
         return {
             on: function(event, callback) {
