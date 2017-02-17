@@ -43,6 +43,11 @@ html, body {
     background-color: #9d223c; !important;
 }
 
-.message-container {
+
+.roomlist {
+    background-color: pink;
+}
+
+.messages {
     background-color: antiquewhite;
 }

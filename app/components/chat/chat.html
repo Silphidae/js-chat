@@ -2,29 +2,32 @@
 
     <h2>{{chatRoomName}}</h2>
 
-    <div class="chat-container">
+    <button class="btn btn-custom" ng-click="leave()">Leave room</button>
 
-        <button class="btn btn-custom" ng-click="leave()">Leave room</button>
-
-        <div class="message-container" scroll-glue>
+    <div class="clearfix">
+        <div class="well well-sm messages" scroll-glue>
             <div data-ng-repeat="message in messages">
                 <span ng-class="{msg: message.user, servmsg: !message.user}">{{message.time | date:'HH:mm:ss'}} <span ng-if="message.user"><{{message.user}}></span> {{message.content}}</span>
             </div>
         </div>
 
-        <div class="user-list" id="user-list">
+        <div class="well well-sm users" id="user-list">
             <b>Users online</b>
             <hr class="divider">
             <div ng-repeat="user in users | orderBy">
                 <span>{{user}}</span>
             </div>
         </div>
-
-        <div id="send-message">
-            <form class="form-inline">
-                <input type="text" class="form-control" data-ng-model="newMessage" autofocus>
-                <button class="btn btn-custom" type="submit" ng-click="sendMessage()">Send message</button>
-            </form>
-        </div>
     </div>
+
+    <div id="send-message">
+        <form class="form-inline">
+            <div class="form-group">
+                <label for="msgInput" class="sr-only">Message input</label>
+                <input type="text" id="msgInput" class="form-control" data-ng-model="newMessage" autofocus>
+                <button class="btn btn-custom" type="submit" ng-click="sendMessage()">Send message</button>
+            </div>
+        </form>
+    </div>
+
 </div>

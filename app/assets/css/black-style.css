@@ -45,6 +45,10 @@ html, body {
 }
 */
 
-.message-container {
+.roomlist {
+    background-color: darkgray;
+}
+
+.messages {
     background-color: #fff;
 }
