@@ -16,8 +16,7 @@ angular.module('ChatApp')
             };
 
             $scope.logout = function() {
-
-                if ($state.current.name == 'chat') {
+                if ($state.current.name === 'chat') {
                     socket.emit('leave room', {
                         room: $state.params.name,
                         user: $localStorage.chatUser,
@@ -25,7 +24,7 @@ angular.module('ChatApp')
                     })
                 }
 
-                socket.emit('leave chat', {
+                socket.emit('logout', {
                     user: $localStorage.chatUser,
                     userId: $localStorage.chatId
                 });
@@ -35,20 +34,5 @@ angular.module('ChatApp')
 
                 $state.go('login');
             };
-
-            socket.on('connect', function() {
-                if($localStorage.chatUser && $localStorage.chatId) {
-                    socket.emit('restore session', {
-                        user: $localStorage.chatUser,
-                        userId: $localStorage.chatId
-                    });
-                }
-            });
-
-            socket.on('close session', function() {
-                delete $localStorage.chatUser;
-                delete $localStorage.chatId;
-                $state.go('login');
-            });
 
         }]);

@@ -1,6 +1,1 @@
-app/bower_components/*
-node_modules/*
-
-app/assets/js/socket.io.js
-app/assets/js/socket.io.js.map
-
+node_modules/

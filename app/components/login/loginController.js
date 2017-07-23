@@ -4,9 +4,6 @@ angular.module('ChatApp')
     .controller('LoginController', ['$localStorage', '$scope', '$state', 'socket',
         function($localStorage, $scope, $state, socket) {
 
-        socket.close();
-        socket.connect();
-
             $scope.submit = function() {
                 $scope.message = '';
 
