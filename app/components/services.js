@@ -1,5 +1,7 @@
 'use strict';
 
+var io = require('socket.io-client');
+
 angular.module('ChatAppServices', []);
 
 angular.module('ChatAppServices')
@@ -33,9 +35,26 @@ angular.module('ChatAppServices')
                 socket.close();
             },
             connect : function() {
-                socket.connect('http://localhost:3000');
+                socket.connect('http://localhost:8080');
             }
         };
+
+    }]);
+
+angular.module('ChatAppServices')
+    .service('AuthService', ['$localStorage', 'socket', function($localStorage, socket) {
+        return {
+            isAuthenticated: function() {
+                console.log('on state change, user is ', $localStorage.chatUser);
+
+                  socket.emit('is authenticated', {
+                    name: $localStorage.chatUser,
+                    userId: $localStorage.chatId
+                }, function(data) {
+                      return data.message === 'true';
+                  });
+            }
+        }
 
     }]);
 

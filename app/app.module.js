@@ -1,5 +1,18 @@
 'use strict';
 
+require('angular');
+require ('./app.routes');
+require ('./components/services');
+require('angular-ui-router');
+require('ngstorage');
+require('angularjs-scroll-glue');
+require('socket.io-client');
+require('bootstrap-css-only/css/bootstrap.css');
+require('./assets/css/style.css');
+require('./assets/css/b-cover.css');
+require('./assets/css/black-style.css');
+require('./assets/css/pink-style.css');
+
 angular.module('ChatApp', [
     'ChatAppRouter',
     'ChatAppServices',
@@ -9,35 +22,16 @@ angular.module('ChatApp', [
 
 angular.module('ChatApp').run(runBlock);
 
-runBlock.$inject = ['$localStorage', '$rootScope', '$state'];
-function runBlock($localStorage, $rootScope, $state) {
-    $rootScope.$on('$stateChangeStart', function (event, toState, toParams, fromState, fromParams) {
+runBlock.$inject = ['AuthService', '$transitions'];
+function runBlock(AuthService, $transitions) {
+
+    $transitions.onStart({to: function(state) {
+        return (state.name === 'rooms' || state.name ==='chat');
+    }}, function(trans) {
 
         // if not authenticated go to login page
-        if (toState.authenticate && !$localStorage.chatUser) {
-            $state.transitionTo('login');
-            event.preventDefault();
-        }
-
-        /* todo now only duplicates normal leave
-        // leave room if browsers back button is clicked while in chat room
-        if (fromState.name == 'chat' && toState.name == 'rooms' && fromParams != '') {
-            socket.emit('leave room', {
-                room: fromParams.name,
-                user: $localStorage.chatUser,
-                userId:  $localStorage.chatId
-            });
-        }
-        */
-
-        // prevent changing straight from another chat to another
-        if (fromState.name == 'chat' && toState.name == 'chat') {
-            event.preventDefault();
-        }
-
-        // prevent going back to login page if logged in
-        if (toState.name == 'login' && $localStorage.chatUser) {
-            event.preventDefault();
+        if (!AuthService.isAuthenticated()) {
+            return trans.router.stateService.target('login')
         }
 
     });

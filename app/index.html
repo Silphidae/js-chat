@@ -9,32 +9,18 @@
 
     <link rel="icon" type="image/png" href="">
 
-    <link rel="stylesheet" href="/scripts/bootstrap-css-only/css/bootstrap.min.css">
-    <link rel="stylesheet" href="assets/css/style.css">
+    <script src="../vendor.bundle.js"></script>
+    <script src="../app.bundle.js"></script>
 
-    <script type="text/javascript" src="scripts/angular/angular.min.js"></script>
+
 </head>
 
 <body data-ng-app="ChatApp">
 
-    <div class="container">
-        <ui-view name="header"></ui-view>
-        <ui-view name="content"></ui-view>
-    </div>
-
-    <script type="text/javascript" src="/scripts/angular-ui-router/release/angular-ui-router.min.js"></script>
-    <script type="text/javascript" src="/scripts/ngstorage/ngStorage.min.js"></script>
-    <script type="text/javascript" src="/scripts/angularjs-scroll-glue/src/scrollglue.js"></script>
-
-    <script type="text/javascript" src="scripts/socket.io-client/dist/socket.io.js"></script>
-
-    <script type="text/javascript" src="app.module.js"></script>
-    <script type="text/javascript" src="app.routes.js"></script>
-    <script type="text/javascript" src="components/services.js"></script>
-    <script type="text/javascript" src="components/chat/chatController.js"></script>
-    <script type="text/javascript" src="components/login/loginController.js"></script>
-    <script type="text/javascript" src="components/navbar/navbarController.js"></script>
-    <script type="text/javascript" src="components/roomlist/roomlistController.js"></script>
+<div class="container">
+    <ui-view name="header"></ui-view>
+    <ui-view name="content"></ui-view>
+</div>
 
 </body>
 

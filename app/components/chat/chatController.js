@@ -4,6 +4,7 @@ angular.module('ChatApp')
     .controller('ChatController', ['$localStorage', '$state', '$scope', 'socket',
         function($localStorage, $state, $scope, socket) {
 
+            //TODO this can be changed on address bar :(
             $scope.chatRoomName = $state.params.name;
 
             $scope.messages = [];
