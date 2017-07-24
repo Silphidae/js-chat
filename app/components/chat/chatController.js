@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('ChatApp')
-    .controller('ChatController', ['$localStorage', '$state', '$scope', 'socket',
-        function($localStorage, $state, $scope, socket) {
+    .controller('ChatController', ['$localStorage', '$state', '$scope', 'socket', '$timeout',
+        function($localStorage, $state, $scope, socket, $timeout) {
 
             $scope.chatRoomName = $state.params.name;
 
@@ -29,7 +29,11 @@ angular.module('ChatApp')
             };
 
             socket.on('update users', function(data) {
-                $scope.users = data.users;
+                $timeout(function() {
+                    $scope.$apply(function() {
+                        $scope.users = data.users;
+                    });
+                }, 0);
             });
 
             socket.on('new message', function(data) {
