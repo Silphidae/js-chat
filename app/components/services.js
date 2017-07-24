@@ -3,6 +3,26 @@
 angular.module('ChatAppServices', []);
 
 angular.module('ChatAppServices')
+    .service('AuthService', ['$q', '$localStorage', 'socket', function($q, $localStorage, socket) {
+
+        return {
+            isAuthenticated: function () {
+                var deferred = $q.defer();
+
+                socket.emit('is authenticated', {user: $localStorage.chatUser});
+
+                socket.on('is authenticated', function (data) {
+                    var response = data.message === 'true'
+                    deferred.resolve(response);
+                });
+
+                return deferred.promise;
+            }
+
+        }
+    }]);
+
+angular.module('ChatAppServices')
     .factory('socket', ['$rootScope', function($rootScope) {
         var socket = io.connect();
 
@@ -16,7 +36,7 @@ angular.module('ChatAppServices')
                 });
             },
             emit: function(event, data, callback) {
-                if (typeof callback == 'function') {
+                if (typeof callback === 'function') {
                     socket.emit(event, data, function () {
                         var args = arguments;
                         $rootScope.$apply(function () {

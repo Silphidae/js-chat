@@ -7,12 +7,12 @@ angular.module('ChatApp')
             $scope.currPage = $state.current.name;
             $scope.username = $localStorage.chatUser;
 
-            $scope.layout = 'black';
+            $scope.layout = ( $localStorage.color || 'black');
 
             $scope.changeLayout = function() {
                 if ($scope.layout === 'black') {
-                    $scope.layout = 'pink';
-                } else $scope.layout = 'black';
+                    $localStorage.color = $scope.layout = 'pink';
+                } else $localStorage.color = $scope.layout = 'black';
             };
 
             $scope.logout = function() {
@@ -31,6 +31,7 @@ angular.module('ChatApp')
 
                 delete $localStorage.chatUser;
                 delete $localStorage.chatId;
+                delete $localStorage.color;
 
                 $state.go('login');
             };

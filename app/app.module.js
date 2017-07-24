@@ -9,37 +9,35 @@ angular.module('ChatApp', [
 
 angular.module('ChatApp').run(runBlock);
 
-runBlock.$inject = ['$localStorage', '$rootScope', '$state'];
-function runBlock($localStorage, $rootScope, $state) {
-    $rootScope.$on('$stateChangeStart', function (event, toState, toParams, fromState, fromParams) {
+runBlock.$inject = ['AuthService', '$localStorage', '$state', '$transitions'];
+function runBlock(AuthService, $localStorage, $state, $transitions) {
+
+    $transitions.onStart({
+        to: function(state) {
+            return (state.name === 'rooms'||state.name === 'chat');
+        }
+    }, function(trans) {
 
         // if not authenticated go to login page
-        if (toState.authenticate && !$localStorage.chatUser) {
-            $state.transitionTo('login');
-            event.preventDefault();
-        }
+        AuthService.isAuthenticated().then(function(res) {
+            if (res === false) {
+                $localStorage.$reset();
+                $state.go('login');
+            }
+        });
 
-        /* todo now only duplicates normal leave
-        // leave room if browsers back button is clicked while in chat room
-        if (fromState.name == 'chat' && toState.name == 'rooms' && fromParams != '') {
-            socket.emit('leave room', {
-                room: fromParams.name,
-                user: $localStorage.chatUser,
-                userId:  $localStorage.chatId
+        $transitions.onStart({to: 'login' }, function(trans) {
+
+            // if authenticated go to rooms page
+            AuthService.isAuthenticated().then(function(res) {
+                if (res === true) {
+                    $state.go('rooms');
+                }
             });
-        }
-        */
 
-        // prevent changing straight from another chat to another
-        if (fromState.name == 'chat' && toState.name == 'chat') {
-            event.preventDefault();
-        }
-
-        // prevent going back to login page if logged in
-        if (toState.name == 'login' && $localStorage.chatUser) {
-            event.preventDefault();
-        }
+        });
 
     });
 
 }
+

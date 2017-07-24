@@ -19,7 +19,6 @@ angular.module('ChatAppRouter').config(function($stateProvider, $urlRouterProvid
         })
         .state('rooms', {
             url: '/rooms',
-            authenticate: true,
             views: {
                 header: {
                     templateUrl: 'components/navbar/navbar.html',
@@ -33,7 +32,6 @@ angular.module('ChatAppRouter').config(function($stateProvider, $urlRouterProvid
         })
         .state('chat', {
             url: '/chat/:name',
-            authenticate: true,
             views: {
                 header: {
                     templateUrl: 'components/navbar/navbar.html',
@@ -46,6 +44,6 @@ angular.module('ChatAppRouter').config(function($stateProvider, $urlRouterProvid
             }
         });
 
-    $urlRouterProvider.otherwise('/rooms');
+    $urlRouterProvider.otherwise('/');
 
 });

@@ -18,11 +18,12 @@ module.exports.listen = function(server) {
         {name: 'secret'}
     ];
 
+    // needed in reconnection
+    let disconnected = false;
+
     io.on('connection', function(socket) {
-        console.log('new client connected', socket.id);
 
         socket.on('new user', function(data) {
-            console.log('create new user, name ' + data.user + ', id '+ socket.id);
             if (users.find(x => x.name === data.user) === undefined) {
                 users.push({name: data.user, userId: socket.id, rooms: []});
 
@@ -31,37 +32,30 @@ module.exports.listen = function(server) {
                 socket.emit('new user', {message: 'user creation failed'});
             }
         });
-
-        socket.on('is authenticated', function(data, fn) {
-            console.log('is authenticated', data.name, data.userId);
-
-            let isAuth = 'false';
-
+        
+        socket.on('is authenticated', function(data) {
             let foundUser = users.find(x => x.name === data.user);
             if (foundUser !== undefined) {
+                disconnected = false;
+                //restore session
                 if (foundUser.userId !== socket.id) {
-                    foundUser.userId = socket.id;
+                    users[users.findIndex(x => x.name === data.user)].userId = socket.id;
                 }
-                isAuth = 'true';
-            }
-
-            fn({message: isAuth});
+                socket.emit('is authenticated', {message: 'true'});
+            } else socket.emit('is authenticated', {message: 'false'});
         });
 
         // room list request
         socket.on('get rooms', function() {
-            console.log('get rooms');
             socket.emit('update rooms', { rooms: rooms });
         });
 
         // room'a user list request
         socket.on('get users', function(data) {
-            console.log('get users');
             socket.emit('update users', { users: users.map(x => x.rooms.some(y => y === data.room) ? x.name : null) });
         });
 
         socket.on('join room', function(data) {
-            console.log('user ' + data.user + ' joins room ' + data.room);
             socket.join(data.room);
 
             // create if room doesn't exist
@@ -83,7 +77,6 @@ module.exports.listen = function(server) {
         });
 
         socket.on('new message', function(data) {
-            console.log('new message to room ' + data.room + ': user ' + data.user + ', ' + data.content);
             let newMsg = ({
                 room: data.room,
                 user: data.user, // should this be users[data.userId].name ?
@@ -95,17 +88,13 @@ module.exports.listen = function(server) {
         });
 
         socket.on('leave room', function(data) {
-            console.log('user ' + data.user + ' leaves room ' + data.room);
             io.in(data.room).emit('new message', { content: data.user + " has left the room." });
 
             let leavingUser = users.find(x => x.userId === data.userId);
 
             if (leavingUser !== undefined) {
                 let roomIndex = leavingUser.rooms.indexOf(data.room);
-
-                if (roomIndex !== -1) {
-                    leavingUser.rooms.splice(roomIndex, 1);
-                }
+                if (roomIndex !== -1) leavingUser.rooms.splice(roomIndex, 1);
             }
 
             io.in(data.room).emit('update users', {users: users.map(x => x.rooms.some(y => y === data.room) ? x.name : null) });
@@ -114,56 +103,50 @@ module.exports.listen = function(server) {
 
             // if empty remove room
             removeRoom(data.room);
-
         });
 
         // logout
         socket.on('logout', function(data) {
-            console.log('user ' + data.user + ' left chat. ' + data.userId);
-
-            let leavingUser = users.find(x => x.userId === data.userId);
-
-            removeUser(leavingUser);
-
+            removeUser(data.userId);
         });
 
         // close the window
         socket.on('disconnect', function() {
-            console.log('client connection closed.', socket.id);
-
-            let leavingUser = users.find(x => x.userId === socket.id);
-
-            removeUser(leavingUser);
+            removeUser(socket.id);
         });
 
-        function removeUser(leavingUser) {
-            if (leavingUser !== undefined) {
-                // go through rooms
-                for (let x of leavingUser.rooms) {
-                    io.in(x).emit('new message', {content: leavingUser.name + " has left the room."});
-                    io.in(x).emit('update users', {users: users.map(y => y.rooms.some(z => z === x) ? y.name : null)});
+        function removeUser(socketId) {
+            disconnected = true;
+            setTimeout(function () {
+                let leavingUser = users.find(x => x.userId === socketId);
 
-                    socket.leave(x);
+                if (leavingUser !== undefined && disconnected === true) {
+                    // go through rooms
+                    for (let x of leavingUser.rooms) {
+                        io.in(x).emit('new message', {content: leavingUser.name + " has left the room."});
+                        io.in(x).emit('update users', {users: users.map(y => y.rooms.some(z => z === x) ? y.name : null)});
 
-                    // if empty remove room
-                    removeRoom(x);
+                        socket.leave(x);
+
+                        // if empty remove room
+                        removeRoom(x);
+                    }
+
+                    // remove from users
+                    users.splice(users.findIndex(x => x === leavingUser), 1);
                 }
-
-                // remove from users
-                users.splice(users.findIndex(x => x === leavingUser), 1);
-            }
+            }, 2000);
         }
 
     });
 
     function removeRoom(roomName) {
         if (users.filter(x => x.rooms.find(y => y === roomName)).length === 0) {
-            if (roomName !== ('general' || 'fun' || 'love' || 'secret')) {
+            if (!roomName === ('general'|| 'fun' || 'love' || 'secret')) {
                 rooms.splice(rooms.findIndex(x => x.name === roomName), 1);
             }
         }
     }
 
     return io;
-
 };
