@@ -4,7 +4,6 @@ angular.module('ChatApp')
     .controller('NavbarController', ['$localStorage', '$scope', '$state', 'socket',
         function($localStorage, $scope, $state, socket) {
 
-            $scope.currPage = $state.current.name;
             $scope.username = $localStorage.chatUser;
 
             $scope.layout = ( $localStorage.color || 'black');
@@ -16,14 +15,6 @@ angular.module('ChatApp')
             };
 
             $scope.logout = function() {
-                if ($state.current.name === 'chat') {
-                    socket.emit('leave room', {
-                        room: $state.params.name,
-                        user: $localStorage.chatUser,
-                        userId:  $localStorage.chatId
-                    })
-                }
-
                 socket.emit('logout', {
                     user: $localStorage.chatUser,
                     userId: $localStorage.chatId

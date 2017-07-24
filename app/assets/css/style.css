@@ -31,7 +31,6 @@ a:hover {
 
 .roomlist {
     color: #000;
-    height: 90%;
 }
 
 .messages {
@@ -114,15 +113,15 @@ a:hover {
     color: rgba(255,255,255,.5);
 }
 
+@media (min-width: 50px){
+    .content-container {
+        padding-top: 0px;
+    }
+}
+
 @media (min-width: 768px) {
     .masthead {
-        position: fixed;
         top: 0;
-    }
-    .mastfoot {
-        position: fixed;
-        bottom: 0;
-        z-index: auto;
     }
     .masthead-brand {
         float: left;
@@ -131,8 +130,13 @@ a:hover {
         float: right;
     }
     .cover-container, .masthead, .mastfoot {
-        width: 100%;
+        width: 90%;
     }
+
+    .content-container {
+        padding-top: 50px;
+    }
+
 }
 
 @media (min-width: 992px) {

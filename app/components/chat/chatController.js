@@ -25,12 +25,7 @@ angular.module('ChatApp')
             };
 
             $scope.leave = function() {
-                socket.emit('leave room', {
-                    room: $scope.chatRoomName,
-                    user: $localStorage.chatUser,
-                    userId:  $localStorage.chatId
-                });
-                $state.go('rooms');
+                 $state.go('rooms');
             };
 
             socket.on('update users', function(data) {
@@ -46,5 +41,16 @@ angular.module('ChatApp')
             function getUsers() {
                 socket.emit('get users', {room: $scope.chatRoomName});
             }
+
+            // send server a message, when chat state ends
+            $scope.$on('$destroy', function() {
+                if ($localStorage.chatUser !== undefined) {
+                    socket.emit('leave room', {
+                        room: $scope.chatRoomName,
+                        user: $localStorage.chatUser,
+                        userId: $localStorage.chatId
+                    });
+                }
+            });
 
         }]);

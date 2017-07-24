@@ -2,23 +2,42 @@
 
 angular.module('ChatAppServices', []);
 
+
+
 angular.module('ChatAppServices')
     .service('AuthService', ['$q', '$localStorage', 'socket', function($q, $localStorage, socket) {
-
         return {
             isAuthenticated: function () {
                 var deferred = $q.defer();
-
                 socket.emit('is authenticated', {user: $localStorage.chatUser});
-
                 socket.on('is authenticated', function (data) {
-                    var response = data.message === 'true'
-                    deferred.resolve(response);
+                    deferred.resolve(data);
                 });
-
                 return deferred.promise;
             }
+        }
+    }]);
 
+angular.module('ChatAppServices')
+    .service('LoginService', ['$q', 'socket', function($q, socket) {
+        return {
+            login: function (nickname) {
+                var deferred = $q.defer();
+                socket.emit('new user', {user: nickname});
+                socket.on('new user', function(data) {
+                    deferred.resolve(data);
+                });
+                return deferred.promise;
+            }
+        }
+    }]);
+
+angular.module('ChatAppServices')
+    .service('SocketUpdater', ['$localStorage', function($localStorage) {
+        return {
+            update: function (socketId) {
+                $localStorage.chatId = socketId;
+            }
         }
     }]);
 
