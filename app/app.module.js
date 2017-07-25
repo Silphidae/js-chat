@@ -9,8 +9,8 @@ angular.module('ChatApp', [
 
 angular.module('ChatApp').run(runBlock);
 
-runBlock.$inject = ['AuthService', 'SocketUpdater', '$localStorage', '$state', '$transitions'];
-function runBlock(AuthService, SocketUpdater, $localStorage, $state, $transitions) {
+runBlock.$inject = ['AuthService', '$localStorage', '$state', '$transitions'];
+function runBlock(AuthService, $localStorage, $state, $transitions) {
 
     $transitions.onStart({
         to: function(state) {

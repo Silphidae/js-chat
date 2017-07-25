@@ -9,6 +9,7 @@ module.exports.listen = function(server) {
     // user ={ name: name, userId: id, room: roomName}
     let users = [];
 
+    // room = { name: name, users: 0}
     // Default rooms: 'general', 'fun', 'love', 'secret'
     let rooms = [
         {name: 'general', users: 0},

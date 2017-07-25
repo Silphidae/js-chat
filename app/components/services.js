@@ -2,8 +2,6 @@
 
 angular.module('ChatAppServices', []);
 
-
-
 angular.module('ChatAppServices')
     .service('AuthService', ['$q', '$localStorage', 'socket', function($q, $localStorage, socket) {
         return {
