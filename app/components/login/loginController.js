@@ -1,20 +1,18 @@
 'use strict';
 
 angular.module('ChatApp')
-    .controller('LoginController', ['$localStorage', '$scope', '$state', 'socket',
-        function($localStorage, $scope, $state, socket) {
+    .controller('LoginController', ['LoginService', '$localStorage', '$scope', '$state',
+        function(LoginService, $localStorage, $scope, $state) {
 
             $scope.submit = function() {
                 $scope.message = '';
 
                 if ($scope.nickname) {
 
-                    socket.emit('new user', {user: $scope.nickname});
-
-                    socket.on('new user', function(data) {
+                    LoginService.login($scope.nickname).then(function(data) {
                         if (data.message === 'user created') {
                             $localStorage.chatUser = $scope.nickname;
-                            $localStorage.chatId = data.userId;
+                            $localStorage.chatId = data.socketId;
                             $state.go('rooms');
                         } else {
                             $scope.message = 'User with name ' + $scope.nickname + ' has already joined. ' +

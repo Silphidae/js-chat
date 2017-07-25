@@ -14,7 +14,7 @@
         <div class="well well-sm users" id="user-list">
             <b>Users online</b>
             <hr class="divider">
-            <div ng-repeat="user in users | orderBy">
+            <div ng-repeat="user in users | orderBy track by $index">
                 <span>{{user}}</span>
             </div>
         </div>

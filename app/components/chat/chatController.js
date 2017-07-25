@@ -1,10 +1,9 @@
 'use strict';
 
 angular.module('ChatApp')
-    .controller('ChatController', ['$localStorage', '$state', '$scope', 'socket',
-        function($localStorage, $state, $scope, socket) {
+    .controller('ChatController', ['$localStorage', '$state', '$scope', 'socket', '$timeout',
+        function($localStorage, $state, $scope, socket, $timeout) {
 
-            //TODO this can be changed on address bar :(
             $scope.chatRoomName = $state.params.name;
 
             $scope.messages = [];
@@ -26,16 +25,15 @@ angular.module('ChatApp')
             };
 
             $scope.leave = function() {
-                socket.emit('leave room', {
-                    room: $scope.chatRoomName,
-                    user: $localStorage.chatUser,
-                    userId:  $localStorage.chatId
-                });
-                $state.go('rooms');
+                 $state.go('rooms');
             };
 
             socket.on('update users', function(data) {
-                $scope.users = data.users;
+                $timeout(function() {
+                    $scope.$apply(function() {
+                        $scope.users = data.users;
+                    });
+                }, 0);
             });
 
             socket.on('new message', function(data) {
@@ -47,5 +45,16 @@ angular.module('ChatApp')
             function getUsers() {
                 socket.emit('get users', {room: $scope.chatRoomName});
             }
+
+            // send server a message, when chat state ends
+            $scope.$on('$destroy', function() {
+                if ($localStorage.chatUser !== undefined) {
+                    socket.emit('leave room', {
+                        room: $scope.chatRoomName,
+                        user: $localStorage.chatUser,
+                        userId: $localStorage.chatId
+                    });
+                }
+            });
 
         }]);

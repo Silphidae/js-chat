@@ -6,87 +6,81 @@ module.exports.listen = function(server) {
 
     const io = socketio.listen(server);
 
-    // user ={ name: name, userId: id, rooms: [] }
+    // user ={ name: name, userId: id, room: roomName}
     let users = [];
 
-    // room = { name: roomname }
     // Default rooms: 'general', 'fun', 'love', 'secret'
     let rooms = [
-        {name: 'general'},
-        {name: 'fun'},
-        {name: 'love'},
-        {name: 'secret'}
+        {name: 'general', users: 0},
+        {name: 'fun', users: 0},
+        {name: 'love', users: 0},
+        {name: 'secret', users: 0}
     ];
 
+
+    // needed in reconnection
+    let disconnected = false;
+
     io.on('connection', function(socket) {
-        console.log('new client connected', socket.id);
 
         socket.on('new user', function(data) {
-            console.log('create new user, name ' + data.user + ', id '+ socket.id);
             if (users.find(x => x.name === data.user) === undefined) {
-                users.push({name: data.user, userId: socket.id, rooms: []});
+                users.push({name: data.user, userId: socket.id, room: ''});
 
-                socket.emit('new user', { message: 'user created', userId: socket.id });
+                socket.emit('new user', { message: 'user created', socketId: socket.id });
             } else {
                 socket.emit('new user', {message: 'user creation failed'});
             }
         });
 
-        socket.on('is authenticated', function(data, fn) {
-            console.log('is authenticated', data.name, data.userId);
-
-            let isAuth = 'false';
-
+        socket.on('is authenticated', function(data) {
             let foundUser = users.find(x => x.name === data.user);
+
             if (foundUser !== undefined) {
+                disconnected = false;
+                //restore session
                 if (foundUser.userId !== socket.id) {
                     foundUser.userId = socket.id;
+                    socket.join(foundUser.room);
                 }
-                isAuth = 'true';
-            }
-
-            fn({message: isAuth});
+                socket.emit('is authenticated', {message: 'true', socketId: socket.id});
+            } else socket.emit('is authenticated', {message: 'false', socketId: socket.id});
         });
 
         // room list request
         socket.on('get rooms', function() {
-            console.log('get rooms');
             socket.emit('update rooms', { rooms: rooms });
         });
 
-        // room'a user list request
+        // room's user list request
         socket.on('get users', function(data) {
-            console.log('get users');
-            socket.emit('update users', { users: users.map(x => x.rooms.some(y => y === data.room) ? x.name : null) });
+            socket.emit('update users', { users: users.map(x => x.room === data.room ? x.name : null) });
         });
 
         socket.on('join room', function(data) {
-            console.log('user ' + data.user + ' joins room ' + data.room);
-            socket.join(data.room);
-
-            // create if room doesn't exist
-            if (rooms.findIndex(x => x.name === data.room) === -1) {
-                rooms.push({name: data.room});
-            }
 
             let joiningUser = users.find(x => x.userId === data.userId);
 
             if (joiningUser !== undefined) {
-                if (joiningUser.rooms.findIndex(x => x === data.room) === -1) {
-                    joiningUser.rooms.push(data.room);
+                // create if room doesn't exist
+                if (rooms.find(x => x.name === data.room) === undefined) {
+                    rooms.push({name: data.room, users: 0});
                 }
+
+                joiningUser.room = data.room;
+                rooms.find(x => x.name === data.room).users++;
+                io.emit('update rooms', { rooms: rooms });
+
+                socket.join(data.room);
+                io.in(data.room).emit('new message', { content: data.user + " has joined the room." });
+                io.in(data.room).emit('update users', { users: users.map(x => x.room === data.room ? x.name : null) });
             }
-
-            io.in(data.room).emit('new message', { content: data.user + " has joined the room." });
-
-            io.in(data.room).emit('update users', {users: users.map(x => x.rooms.some(y => y === data.room) ? x.name : null) });
         });
 
         socket.on('new message', function(data) {
-            console.log('new message to room ' + data.room + ': user ' + data.user + ', ' + data.content);
             let newMsg = ({
                 room: data.room,
-                user: data.user, // should this be users[data.userId].name ?
+                user: data.user,
                 content: data.content,
                 time: new Date()
             });
@@ -95,75 +89,68 @@ module.exports.listen = function(server) {
         });
 
         socket.on('leave room', function(data) {
-            console.log('user ' + data.user + ' leaves room ' + data.room);
-            io.in(data.room).emit('new message', { content: data.user + " has left the room." });
-
-            let leavingUser = users.find(x => x.userId === data.userId);
+            let leavingUser =  users.find(x => x.userId === data.userId);
 
             if (leavingUser !== undefined) {
-                let roomIndex = leavingUser.rooms.indexOf(data.room);
-
-                if (roomIndex !== -1) {
-                    leavingUser.rooms.splice(roomIndex, 1);
-                }
+                leavingUser.room = '';
             }
 
-            io.in(data.room).emit('update users', {users: users.map(x => x.rooms.some(y => y === data.room) ? x.name : null) });
+            let leaveRoom = rooms.find(x => x.name === data.room);
+            if (leaveRoom !== undefined) {
+                leaveRoom.users--;
+                io.in(data.room).emit('new message', {content: data.user + " has left the room."});
+                io.in(data.room).emit('update users', {users: users.map(x => x.room === data.room ? x.name : null)});
+                socket.leave(data.room);
 
-            socket.leave(data.room);
-
-            // if empty remove room
-            removeRoom(data.room);
-
+                removeEmptyRoom(data.room);
+                io.emit('update rooms', { rooms: rooms });
+            }
         });
 
         // logout
         socket.on('logout', function(data) {
-            console.log('user ' + data.user + ' left chat. ' + data.userId);
-
-            let leavingUser = users.find(x => x.userId === data.userId);
-
-            removeUser(leavingUser);
-
+            removeUser(data.userId, 0);
         });
 
         // close the window
         socket.on('disconnect', function() {
-            console.log('client connection closed.', socket.id);
-
-            let leavingUser = users.find(x => x.userId === socket.id);
-
-            removeUser(leavingUser);
+            removeUser(socket.id, 3000);
         });
 
-        function removeUser(leavingUser) {
-            if (leavingUser !== undefined) {
-                // go through rooms
-                for (let x of leavingUser.rooms) {
-                    io.in(x).emit('new message', {content: leavingUser.name + " has left the room."});
-                    io.in(x).emit('update users', {users: users.map(y => y.rooms.some(z => z === x) ? y.name : null)});
+        function removeUser(socketId, waitTime) {
+            disconnected = true;
 
-                    socket.leave(x);
+            setTimeout(function () {
+                let leavingUser = users.find(x => x.userId === socketId);
+                if (leavingUser !== undefined && disconnected === true) {
+                    if (leavingUser.room !== '') {
+                        rooms.find(x => x.name === leavingUser.room).users--;
 
-                    // if empty remove room
-                    removeRoom(x);
+                        io.in(leavingUser.room).emit('new message', { content: leavingUser.name + " has left the room." });
+                        io.in(leavingUser.room).emit('update users', { users: users.map(x => x.room === leavingUser.room ? x.name : null) });
+                        socket.leave(leavingUser.room);
+
+                        removeEmptyRoom(leavingUser.room);
+                    }
+
                 }
-
                 // remove from users
-                users.splice(users.findIndex(x => x === leavingUser), 1);
-            }
+                let userIndex = users.findIndex(x => x === leavingUser);
+                if (userIndex !== -1) users.splice(userIndex, 1);
+
+                io.emit('update rooms', { rooms: rooms });
+            }, waitTime);
         }
 
     });
 
-    function removeRoom(roomName) {
-        if (users.filter(x => x.rooms.find(y => y === roomName)).length === 0) {
-            if (roomName !== ('general' || 'fun' || 'love' || 'secret')) {
+    function removeEmptyRoom(roomName) {
+        if (rooms.find(x => x.name === roomName).users === 0) {
+            if (roomName !== 'general' && roomName !== 'fun' && roomName !== 'love' && roomName !== 'secret') {
                 rooms.splice(rooms.findIndex(x => x.name === roomName), 1);
             }
         }
     }
 
     return io;
-
 };

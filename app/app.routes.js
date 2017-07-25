@@ -33,7 +33,7 @@ angular.module('ChatAppRouter').config(function($stateProvider, $urlRouterProvid
             }
         })
         .state('chat', {
-            url: '/chat/{name}',
+            url: '/chat/:name',
             views: {
                 header: {
                     templateUrl: 'components/navbar/navbar.html',
@@ -43,30 +43,10 @@ angular.module('ChatAppRouter').config(function($stateProvider, $urlRouterProvid
                     templateUrl: 'components/chat/chat.html',
                     controller: 'ChatController'
                 }
-            },
-            resolve: {
-                chat: function($transition$) {
-                    chatname =  $transition$.params().name;
-                    return chatname;
-                }
-            },
-            onExit: {
-                function($localStorage, $transition$, socket) {
-                    console.log('on exit');
-                    console.log('params', $transition$.params());
-                    socket.emit('leave room', {
-                        room: chatname.name,
-                        user: $localStorage.chatUser,
-                        userId: $localStorage.chatId
-                    });
-                    chatname = '';
-                }
             }
 
         });
 
-    var chatname = '';
-    
-    $urlRouterProvider.otherwise('/rooms');
+    $urlRouterProvider.otherwise('/');
 
 });
