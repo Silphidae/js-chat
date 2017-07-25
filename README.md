@@ -6,7 +6,7 @@
 Basic chat application.
 
 A demo application can be found in
-https://simple-socket-chat-demo.herokuapp.com/
+https://js-chat-2.herokuapp.com/
 
 
 **Backend:** Node, Express, Socket.io
